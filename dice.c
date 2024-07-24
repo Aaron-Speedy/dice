@@ -17,7 +17,7 @@
 #define NUM_FACES 6
 
 typedef struct {
-  int faces[NUM_FACES];
+  int faces[NUM_FACES + 1];
   int top;
   // enum {
   //   NORTH = 
@@ -25,7 +25,7 @@ typedef struct {
 } Dice;
 
 Dice def_dice = {
-  .faces = { 1, 2, 3, 6, 5, 4, },
+  .faces = { 0, 1, 2, 3, 6, 5, 4, },
 };
 
 typedef struct {
@@ -51,15 +51,6 @@ int main() {
 
   Arena scratch = arena_init(256 * 1024 * 1024);
 
-  Map map = { .w = 30, .h = 30, };
-  alloc_map(&map);
-  for (int i = 0; i < map.w; i++) {
-    for (int j = 0; j < map.h; j++) {
-      m_at(map, i, j) = def_dice;
-      m_at(map, i, j).top = randi(1, NUM_FACES);
-    }
-  }
-
   Texture2D face_texts[NUM_FACES];
   {
     char literal[] = "recs/face-1.png";
@@ -71,14 +62,36 @@ int main() {
     }
   }
 
-  Camera2D cam = { .zoom = 0.3, };
+  Map map = { .w = 30, .h = 30, };
+  alloc_map(&map);
+  for (int i = 0; i < map.w; i++) {
+    for (int j = 0; j < map.h; j++) {
+      m_at(map, i, j) = def_dice;
+      m_at(map, i, j).top = randi(1, NUM_FACES);
+    }
+  }
+
+  Camera2D cam = {
+    .zoom = 0.3,
+    .target = {
+      map.w * face_texts[0].width/2, 
+      map.h * face_texts[0].height/2,
+    },
+  };
   while (!WindowShouldClose()) {
     arena_free_all(&scratch);
 
     float delta = GetFrameTime();
 
+    cam.offset = (Vector2){ GetRenderWidth()/2, GetRenderHeight()/2, };
+
     if (IsKeyDown(KEY_N)) cam.zoom *= 1.0 + 2 * delta;
     if (IsKeyDown(KEY_M)) cam.zoom /= 1.0 + 2 * delta;
+
+    if (IsKeyDown(KEY_H)) cam.target.x -= 1000 * delta / cam.zoom;
+    if (IsKeyDown(KEY_J)) cam.target.y += 1000 * delta / cam.zoom;
+    if (IsKeyDown(KEY_K)) cam.target.y -= 1000 * delta / cam.zoom;
+    if (IsKeyDown(KEY_L)) cam.target.x += 1000 * delta / cam.zoom;
 
     BeginDrawing();
     BeginMode2D(cam);
