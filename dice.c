@@ -3,6 +3,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+// TODO: Make cross-platform
+#include <unistd.h>
+
+int usleep(int usec);
+
 #include <raylib.h>
 
 #define MATH_IMPL
@@ -48,6 +53,7 @@ int main() {
     "dice"
   );
   SetTargetFPS(60);
+  // EnableEventWaiting();
 
   Arena scratch = arena_init(256 * 1024 * 1024);
 
@@ -62,12 +68,12 @@ int main() {
     }
   }
 
-  Map map = { .w = 30, .h = 30, };
+  Map map = { .w = 100, .h = 100, };
   alloc_map(&map);
   for (int i = 0; i < map.w; i++) {
     for (int j = 0; j < map.h; j++) {
       m_at(map, i, j) = def_dice;
-      m_at(map, i, j).top = randi(1, NUM_FACES);
+      m_at(map, i, j).top = randi(0, 6) == 0 ? randi(0, NUM_FACES) : 0;
     }
   }
 
@@ -77,6 +83,7 @@ int main() {
       map.w * face_texts[0].width/2, 
       map.h * face_texts[0].height/2,
     },
+    .zoom = 0.1,
   };
   while (!WindowShouldClose()) {
     arena_free_all(&scratch);
@@ -111,6 +118,8 @@ int main() {
     }
     EndMode2D();
     EndDrawing();
+
+    usleep(1000000 / 100);
   }
 
   return 0;
