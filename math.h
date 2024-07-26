@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <math.h>
 
-#define m_at(m, i, j) (m).buf[(i) + (j) * (m).w]
-
 float randf(float min, float max);
 int randi(int min, int max);
 int sign(int x);
